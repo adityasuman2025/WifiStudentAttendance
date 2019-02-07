@@ -1,44 +1,59 @@
 package com.example.qr_attendance;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.widget.TextView;
 
-public class ListCourses extends AppCompatActivity
+public class ListCourses extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener
 {
-//define variables
-    SharedPreferences sharedPreferences;
-    TextView userInfo;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_courses);
 
-        userInfo = findViewById(R.id.userInfo);
+        BottomNavigationView navigation = findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(this);
 
-    //checking the existing cookie
-        sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        String user_id_cookie = decrypt(sharedPreferences.getString("user_id", "DNE"));
-        String roll_no_cookie = decrypt(sharedPreferences.getString("roll_no", "DNE"));
+        loadFragment(new CoursesFragment());
+    }
 
-        userInfo.setText("Roll No: " + roll_no_cookie + "\nUser ID: " + user_id_cookie);
+//function to load fragments
+    private boolean loadFragment(Fragment fragment)
+    {
+        if(fragment != null)
+        {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .commit();
+            return true;
+        }
+        return false;
     }
 
 
-//function for encrypting and decrypting the text
-    public static String encrypt(String input)
+//on selecting any option on bottom navigation bar
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem)
     {
-        // This is base64 encoding, which is not an encryption
-        return Base64.encodeToString(input.getBytes(), Base64.DEFAULT);
-    }
-
-    public static String decrypt(String input)
-    {
-        return new String(Base64.decode(input, Base64.DEFAULT));
+        Fragment fragment = null;
+        switch (menuItem.getItemId())
+        {
+            case R.id.navigation_view:
+                fragment = new ViewFragment();
+                break;
+            case R.id.navigation_courses:
+                fragment = new CoursesFragment();
+                break;
+            case R.id.navigation_settings:
+                fragment = new SettingsFragment();
+                break;
+        }
+        return loadFragment(fragment);
     }
 }
