@@ -56,8 +56,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:background="@color/white"
+        android:textColor="@color/colorAccent"
         android:text="Register"
         android:layout_marginTop="200px"
-        android:textColor="@color/colorAccent" />
+        style="?android:attr/borderlessButtonStyle"
+        />
+
 </LinearLayout>

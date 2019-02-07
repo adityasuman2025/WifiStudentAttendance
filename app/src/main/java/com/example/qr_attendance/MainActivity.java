@@ -1,6 +1,7 @@
 package com.example.qr_attendance;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.provider.Settings;
@@ -29,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity
 {
+//defining variables
     Button login_btn;
     Button register_btn;
     EditText roll_no_input;
@@ -93,6 +95,10 @@ public class MainActivity extends AppCompatActivity
 
                         login_feed.setText(Integer.toString(login_result));
                     }
+                    else if(login_result == -1)
+                    {
+                        login_feed.setText("Database issue found");
+                    }
                     else
                     {
                         login_feed.setText("Your login credentials may be incorrect or this may be not your registered phone.");
@@ -105,14 +111,29 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+
+    //on clicking on register button
+        register_btn.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                Intent homeIntent = new Intent(MainActivity.this, Register.class);
+                startActivity(homeIntent);
+                //finish(); //used to delete the last activity history which we don't want to delete
+            }
+        });
     }
 
-    public static String encrypt(String input) {
+//function for encrypting and decrypting the text
+    public static String encrypt(String input)
+    {
         // This is base64 encoding, which is not an encryption
         return Base64.encodeToString(input.getBytes(), Base64.DEFAULT);
     }
 
-    public static String decrypt(String input) {
+    public static String decrypt(String input)
+    {
         return new String(Base64.decode(input, Base64.DEFAULT));
     }
 }
@@ -186,7 +207,6 @@ class getData extends AsyncTask<String,Void,String>
         }
         return result;
     }
-
 }
 
 
