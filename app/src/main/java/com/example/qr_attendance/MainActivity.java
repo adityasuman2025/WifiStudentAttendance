@@ -55,15 +55,18 @@ public class MainActivity extends AppCompatActivity
 
     //checking if already loggedIn or not
         sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        String roll_no_cookie = sharedPreferences.getString("user_id", "DNE");
+        String user_id_cookie = sharedPreferences.getString("user_id", "DNE");
 
-        if(roll_no_cookie.equals("DNE"))
+        if(user_id_cookie.equals("DNE"))
         {
             //login_feed.setText("No one is logged in");
         }
         else //if someone is already logged in
         {
-            login_feed.setText(decrypt(roll_no_cookie));
+        //redirecting the list course page
+            Intent ListCourseIntent = new Intent(MainActivity.this, ListCourses.class);
+            startActivity(ListCourseIntent);
+            finish(); //used to delete the last activity history which we want to delete
         }
 
     //to get unique identification of a phone and displaying it
@@ -93,7 +96,12 @@ public class MainActivity extends AppCompatActivity
                         editor.putString("user_id", encrypt(Integer.toString(login_result)));
                         editor.apply();
 
-                        login_feed.setText(Integer.toString(login_result));
+                        //login_feed.setText(Integer.toString(login_result));
+
+                    //redirecting the list course page
+                        Intent ListCourseIntent = new Intent(MainActivity.this, ListCourses.class);
+                        startActivity(ListCourseIntent);
+                        finish(); //used to delete the last activity history which we don't want to delete
                     }
                     else if(login_result == -1)
                     {
@@ -120,7 +128,7 @@ public class MainActivity extends AppCompatActivity
             {
                 Intent homeIntent = new Intent(MainActivity.this, Register.class);
                 startActivity(homeIntent);
-                //finish(); //used to delete the last activity history which we don't want to delete
+                finish(); //used to delete the last activity history which we want to delete
             }
         });
     }

@@ -18,7 +18,7 @@
             android:maxHeight="150px"
             android:ems="10"
             android:hint="Name"
-            android:inputType="textCapWords"
+            android:inputType="textPersonName"
             android:layout_margin="10px"
             />
 
