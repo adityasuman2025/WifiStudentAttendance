@@ -31,15 +31,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 public class CoursesFragment extends Fragment
@@ -135,7 +131,7 @@ public class CoursesFragment extends Fragment
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
             {
-                //creating cookie for course_id
+            //creating cookie for course_id
                 String listViewText = ((TextView)view).getText().toString();
                 String temp[] = listViewText.split(" # ");
 
@@ -144,7 +140,7 @@ public class CoursesFragment extends Fragment
                 editor.putString("course_id", course_id_cookie);
                 editor.apply();
 
-                //redirecting to the qr code generator page
+            //redirecting to the qr code generator page
                 Intent QRCodeGeneratorIntent = new Intent(getActivity().getApplicationContext(), AttendanceQR.class);
                 startActivity(QRCodeGeneratorIntent);
             }
