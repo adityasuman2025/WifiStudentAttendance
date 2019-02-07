@@ -11,9 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".AttendanceQR"></activity>
         <activity
             android:name=".ListCourses"
-            android:label="@string/title_activity_list_courses"></activity>
+            android:label="@string/title_activity_list_courses" />
         <activity android:name=".listCourse" />
         <activity android:name=".Register" />
         <activity android:name=".MainActivity">

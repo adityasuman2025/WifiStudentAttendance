@@ -202,7 +202,6 @@ class getData extends AsyncTask<String,Void,String>
                 bufferedReader.close();
                 inputStream.close();
                 httpURLConnection.disconnect();
-                return result;
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (UnsupportedEncodingException e) {

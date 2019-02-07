@@ -6,7 +6,6 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 public class ListCourses extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener
 {
@@ -35,7 +34,6 @@ public class ListCourses extends AppCompatActivity implements BottomNavigationVi
         }
         return false;
     }
-
 
 //on selecting any option on bottom navigation bar
     @Override

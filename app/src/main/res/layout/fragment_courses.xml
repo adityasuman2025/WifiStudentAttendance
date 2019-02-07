@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="print"/>
-
         <TextView
             android:id="@+id/text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Courses"
-            />
-    </LinearLayout>
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:padding="20px"
+            android:textSize="60px"
+            android:text="Your Registered Courses"
+            android:textColor="@color/white"
+            android:background="@color/colorAccent"
 
-</ScrollView>
+            />
+
+        <ListView
+            android:id="@+id/courseListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </ListView>
+    </LinearLayout>
