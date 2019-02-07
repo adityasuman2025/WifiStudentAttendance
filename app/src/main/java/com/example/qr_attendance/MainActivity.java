@@ -81,28 +81,21 @@ public class MainActivity extends AppCompatActivity
             //trying to login the user
                 try
                 {
-                    String login_result = new getData().execute(type, roll_no, password, androidId, uniqueID).get();
+                    int login_result = Integer.parseInt(new getData().execute(type, roll_no, password, androidId, uniqueID).get());
 
-                    if(!login_result.equals("0"))
+                    if(login_result > 0)
                     {
+                    //creating cookie of the logged in user
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString("roll_no", encrypt(roll_no));
-                        editor.putString("user_id", encrypt(login_result));
+                        editor.putString("user_id", encrypt(Integer.toString(login_result)));
                         editor.apply();
 
-                        login_feed.setText(login_result);
-                    }
-                    else if(login_result.equals("Login Failed"))
-                    {
-                        login_feed.setText("Your login credentials may be incorrect or this may be not your registered phone.");
-                    }
-                    else if(login_result.equals("0"))
-                    {
-                        login_feed.setText("Your login credentials may be incorrect or this may be not your registered phone.");
+                        login_feed.setText(Integer.toString(login_result));
                     }
                     else
                     {
-                        login_feed.setText(login_result);
+                        login_feed.setText("Your login credentials may be incorrect or this may be not your registered phone.");
                     }
 
                 } catch (ExecutionException e) {
