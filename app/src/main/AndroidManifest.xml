@@ -7,16 +7,19 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="QR Attendance"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AttendanceQR"></activity>
         <activity
             android:name=".ListCourses"
-            android:label="@string/title_activity_list_courses" />
-        <activity android:name=".listCourse" />
-        <activity android:name=".Register" />
+            android:label="Student Dashboard" />
+        <activity
+            android:name=".Register"
+            android:label="Register" />
+        <activity
+            android:name=".AttendanceQR"
+            android:label="QR Code" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
