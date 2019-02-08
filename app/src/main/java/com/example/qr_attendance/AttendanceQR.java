@@ -60,6 +60,7 @@ public class AttendanceQR extends AppCompatActivity
                 Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
 
                 qr_view.setImageBitmap(bitmap);
+                //qr_text.setText(course_id_cookie);
             }
             catch(WriterException e)
             {

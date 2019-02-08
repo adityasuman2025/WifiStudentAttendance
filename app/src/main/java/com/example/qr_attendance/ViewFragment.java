@@ -131,7 +131,7 @@ public class ViewFragment extends Fragment
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
             {
-                //creating cookie for course_id
+            //creating cookie for course_id
                 String listViewText = ((TextView)view).getText().toString();
                 String temp[] = listViewText.split(" # ");
 

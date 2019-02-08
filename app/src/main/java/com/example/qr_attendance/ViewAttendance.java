@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -33,14 +35,24 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 public class ViewAttendance extends AppCompatActivity
 {
-
     SharedPreferences sharedPreferences;
+
     TextView qr_text;
+    TextView courseCode;
+    TextView courseName;
+    TextView courseDuration;
+    TextView noOfClasses;
+    TextView presentDays;
+    TextView percentage;
+    TextView warningText;
+
+    String data[];
+    ListView presentDateLV;
+    ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -49,21 +61,19 @@ public class ViewAttendance extends AppCompatActivity
         setContentView(R.layout.activity_view_attendance);
 
         qr_text = findViewById(R.id.qr_text);
+        courseCode = findViewById(R.id.courseCode);
+        courseName = findViewById(R.id.courseName);
+        courseDuration = findViewById(R.id.courseDuration);
+        noOfClasses = findViewById(R.id.noOfClasses);
+        presentDays = findViewById(R.id.presentDays);
+        percentage = findViewById(R.id.percentage);
+        warningText = findViewById(R.id.warningText);
+        presentDateLV = findViewById(R.id.presentDateLV);
 
         //to get the cookie values
         sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         String user_id_cookie = decrypt(sharedPreferences.getString("user_id", "DNE"));
         String course_id_cookie = sharedPreferences.getString("course_id", "DNE");
-
-        //to get current timestamps
-        Long tsLong = System.currentTimeMillis()/1000;
-        String ts = tsLong.toString();
-
-        //storing info into JSON and encrypting it
-        String qr_data[] = {user_id_cookie, course_id_cookie, ts}; //JSON format: userID, courseID, currentTimestamps
-        JSONArray mJSONArray = new JSONArray(Arrays.asList(qr_data));
-
-        String encrypted_data = (mJSONArray.toString());
 
         //checking if phone if connected to net or not
         ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -71,43 +81,94 @@ public class ViewAttendance extends AppCompatActivity
                 connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED)
         {
             //we are connected to a network
-            String type= "get_student_attendance";
-            String get_user_courses_result = null;
+            try
+            {
+            //to get attendance details for a student and course
+                String type= "get_student_attendance";
+                String get_user_courses_result = new getAttendanceData().execute(type, user_id_cookie, course_id_cookie).get();
 
-            try {
-                get_user_courses_result = (new getAttendanceData().execute(type, user_id_cookie, course_id_cookie).get());
+                if(get_user_courses_result != "0" && get_user_courses_result != "-1")
+                {
+                    //parse JSON and getting data
+                    JSONArray ja = new JSONArray(get_user_courses_result);
+                    JSONObject jo = ja.getJSONObject(0);
 
-                //parse JSON data
-                JSONArray ja = new JSONArray(get_user_courses_result);
-                JSONObject jo = ja.getJSONObject(0);
+                    int no_of_present_days = ja.length();
 
-                String course_from_string = jo.getString("course_from");
-                String course_to_string = jo.getString("course_to");
+                    String course_code_string = jo.getString("course_code");
+                    String course_name_string = jo.getString("course_name");
+                    String course_from_string = jo.getString("course_from");
+                    String course_to_string = jo.getString("course_to");
 
-                int present_days_count = ja.length();
+                //to get all the dates when that student was present
+                    data = new String[ja.length()];
 
-                Date course_from_date = new SimpleDateFormat("yyyy-MM-dd").parse(course_from_string);
-                Date course_to_date = new SimpleDateFormat("yyyy-MM-dd").parse(course_to_string);
+                    for (int i = 0; i<ja.length(); i++)
+                    {
+                        jo = ja.getJSONObject(i);
 
-                Date_class date_class = new Date_class();
-                int no_of_days = date_class.getWorkingDaysBetweenTwoDates(course_from_date, course_to_date);
+                        String temp = jo.getString("date");
 
-                //qr_text.setText("From: " + course_from + "\nTo: " + course_to + "\nDays count:" + Integer.toString(present_days_count));
-                qr_text.setText(Integer.toString(no_of_days));
+                    //formatting date in our desired format
+                        Date course_from_date = new SimpleDateFormat("yyyy-MM-dd").parse(temp);
+                        DateFormat df = new SimpleDateFormat("dd MMM YYYY EEE");
+                        String strDate = df.format(course_from_date);
 
-            } catch (ExecutionException e) {
+                        data[i] = strDate;
+                    }
+
+                //listing the present dates in listview
+                    adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data);
+                    presentDateLV.setAdapter(adapter);
+
+                    //to get class dates for a course
+                    type= "get_course_class_count";
+                    String get_course_class_count_result = (new getAttendanceData().execute(type, course_id_cookie).get());
+
+                    if(get_course_class_count_result != "0" && get_course_class_count_result != "-1")
+                    {
+                        float no_of_classes = Float.parseFloat(get_course_class_count_result);
+                        float present_percentage = (no_of_present_days/no_of_classes)*100;
+
+                    //if attendance percentage is below 75% then giving warning to the student
+                        if(present_percentage < 75.0)
+                        {
+                            warningText.setText("You have low attendance in this course");
+                        }
+
+                        noOfClasses.setText("No of classes till date: " + get_course_class_count_result);
+                        percentage.setText("Attendance Percentage: " + Float.toString(present_percentage) + "%");
+                    }
+                    else
+                    {
+                        qr_text.setText("Something went wrong while getting number of classes of the course");
+                    }
+
+                    courseCode.setText(course_code_string);
+                    courseName.setText(course_name_string);
+                    courseDuration.setText("(From: " + course_from_string + ",  To: " + course_to_string + ")");
+                    presentDays.setText("Present days: " + Integer.toString(no_of_present_days));
+                }
+                else
+                {
+                    qr_text.setText("Something went wrong while getting attendance data");
+                }
+
+            } catch (ExecutionException e){
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
+                qr_text.setText("No Attendance data found for this course");
                 e.printStackTrace();
             } catch (ParseException e) {
                 e.printStackTrace();
             }
+
         }
         else
         {
-            qr_text.setText("Internet connection does not exist");
+            qr_text.setText("Internet connection is not available");
         }
     }
 
@@ -172,7 +233,7 @@ class getAttendanceData extends AsyncTask<String,Void,String>
 
                 while((line = bufferedReader.readLine())!= null)
                 {
-                    result += (line + "\n");
+                    result += (line);
                 }
 
                 bufferedReader.close();
@@ -188,12 +249,67 @@ class getAttendanceData extends AsyncTask<String,Void,String>
                 e.printStackTrace();
             }
         }
+        else if(type.equals("get_course_class_count"))
+        {
+            String login_url = base_url + "get_course_class_count.php";
+
+            try
+            {
+                String course_id = params[1];
+
+                //connecting with server
+                url = new URL(login_url);
+                HttpURLConnection httpURLConnection = null;
+                httpURLConnection = (HttpURLConnection)url.openConnection();
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.setDoInput(true);
+
+                //sending login info to the server
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+
+                String post_data = URLEncoder.encode("course_id","UTF-8")+"="+URLEncoder.encode(course_id,"UTF-8");
+
+                bufferedWriter.write(post_data);
+                bufferedWriter.flush();
+                bufferedWriter.close();
+                outputStream.close();
+
+                //getting the data coming from server after logging
+                InputStream inputStream = httpURLConnection.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
+
+                result="";
+                String line;
+
+                while((line = bufferedReader.readLine())!= null)
+                {
+                    result += (line);
+                }
+
+                bufferedReader.close();
+                inputStream.close();
+                httpURLConnection.disconnect();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         return result;
     }
 }
 
+//class to get count of no of days between two dates
 class Date_class
 {
+//function to count no of days between two dates
     public static int getWorkingDaysBetweenTwoDates(Date startDate, Date endDate) {
         Calendar startCal = Calendar.getInstance();
         startCal.setTime(startDate);
@@ -213,12 +329,15 @@ class Date_class
             endCal.setTime(startDate);
         }
 
-        do {
+        do
+         {
             //excluding start date
-            startCal.add(Calendar.DAY_OF_MONTH, 1);
-            if (startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
-                ++workDays;
-            }
+             startCal.add(Calendar.DAY_OF_MONTH, 1);
+             ++workDays;
+
+//            if (startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+//                ++workDays;
+//            }
         } while (startCal.getTimeInMillis() < endCal.getTimeInMillis()); //excluding end date
 
         return workDays;
