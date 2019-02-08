@@ -19,16 +19,16 @@
             android:text="Settings"
             android:textAlignment="center"
             android:textColor="@color/white"
-            android:textSize="50px" />
+            android:textSize="60px" />
 
         <TextView
             android:id="@+id/studentDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="55px"
+            android:textSize="50px"
             android:textColor="@color/colorPrimary"
             android:paddingLeft="30px"
-            android:paddingBottom="10px"/>
+            android:padding="10px"/>
 
         <View
             android:id="@+id/divider"

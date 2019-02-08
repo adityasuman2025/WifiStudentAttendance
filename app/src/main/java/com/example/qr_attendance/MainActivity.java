@@ -3,6 +3,8 @@ package com.example.qr_attendance;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
@@ -83,39 +85,49 @@ public class MainActivity extends AppCompatActivity
                 String password = password_input.getText().toString();
                 String type = "verify_login";
 
-            //trying to login the user
-                try
+            //checking if phone if connected to net or not
+                ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+                if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                        connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED)
                 {
-                    int login_result = Integer.parseInt(new getData().execute(type, roll_no, password, androidId, uniqueID).get());
-
-                    if(login_result > 0)
+                //trying to login the user
+                    try
                     {
-                    //creating cookie of the logged in user
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("roll_no", encrypt(roll_no));
-                        editor.putString("user_id", encrypt(Integer.toString(login_result)));
-                        editor.apply();
+                        int login_result = Integer.parseInt(new getData().execute(type, roll_no, password, androidId, uniqueID).get());
 
-                        //login_feed.setText(Integer.toString(login_result));
+                        if(login_result > 0)
+                        {
+                            //creating cookie of the logged in user
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("roll_no", encrypt(roll_no));
+                            editor.putString("user_id", encrypt(Integer.toString(login_result)));
+                            editor.apply();
 
-                    //redirecting the list course page
-                        Intent ListCourseIntent = new Intent(MainActivity.this, ListCourses.class);
-                        startActivity(ListCourseIntent);
-                        finish(); //used to delete the last activity history which we don't want to delete
-                    }
-                    else if(login_result == -1)
-                    {
-                        login_feed.setText("Database issue found");
-                    }
-                    else
-                    {
-                        login_feed.setText("Your login credentials may be incorrect or this may be not your registered phone.");
-                    }
+                            //login_feed.setText(Integer.toString(login_result));
 
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                            //redirecting the list course page
+                            Intent ListCourseIntent = new Intent(MainActivity.this, ListCourses.class);
+                            startActivity(ListCourseIntent);
+                            finish(); //used to delete the last activity history which we don't want to delete
+                        }
+                        else if(login_result == -1)
+                        {
+                            login_feed.setText("Database issue found");
+                        }
+                        else
+                        {
+                            login_feed.setText("Your login credentials may be incorrect or this may be not your registered phone.");
+                        }
+
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else
+                {
+                    login_feed.setText("Internet connection is not available");
                 }
             }
         });
