@@ -68,6 +68,7 @@ public class ViewAttendance extends AppCompatActivity
         presentDays = findViewById(R.id.presentDays);
         percentage = findViewById(R.id.percentage);
         warningText = findViewById(R.id.warningText);
+
         presentDateLV = findViewById(R.id.presentDateLV);
 
         //to get the cookie values
@@ -87,7 +88,7 @@ public class ViewAttendance extends AppCompatActivity
                 String type= "get_student_attendance";
                 String get_user_courses_result = new getAttendanceData().execute(type, user_id_cookie, course_id_cookie).get();
 
-                if(get_user_courses_result != "0" && get_user_courses_result != "-1")
+                if(get_user_courses_result != "0" && get_user_courses_result != "-1" && get_user_courses_result != "Something went wrong")
                 {
                     //parse JSON and getting data
                     JSONArray ja = new JSONArray(get_user_courses_result);
@@ -125,7 +126,7 @@ public class ViewAttendance extends AppCompatActivity
                     type= "get_course_class_count";
                     String get_course_class_count_result = (new getAttendanceData().execute(type, course_id_cookie).get());
 
-                    if(get_course_class_count_result != "0" && get_course_class_count_result != "-1")
+                    if(get_course_class_count_result != "0" && get_course_class_count_result != "-1" && get_course_class_count_result != "Something went wrong")
                     {
                         float no_of_classes = Float.parseFloat(get_course_class_count_result);
                         float present_percentage = (no_of_present_days/no_of_classes)*100;

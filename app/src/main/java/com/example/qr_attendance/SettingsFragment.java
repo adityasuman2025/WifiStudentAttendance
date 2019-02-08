@@ -186,7 +186,7 @@ class getStudentDetails extends AsyncTask<String,Void,String>
                 httpURLConnection.setDoOutput(true);
                 httpURLConnection.setDoInput(true);
 
-                //sending login info to the server
+                //sending data to the server
                 OutputStream outputStream = httpURLConnection.getOutputStream();
                 BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
 
@@ -197,7 +197,7 @@ class getStudentDetails extends AsyncTask<String,Void,String>
                 bufferedWriter.close();
                 outputStream.close();
 
-                //getting the data coming from server after logging
+                //getting the data coming from server
                 InputStream inputStream = httpURLConnection.getInputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
 

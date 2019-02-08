@@ -27,8 +27,9 @@
             android:layout_height="wrap_content"
             android:textSize="50px"
             android:textColor="@color/colorPrimary"
-            android:paddingLeft="30px"
-            android:padding="10px"/>
+            android:paddingTop="10px"
+            android:paddingBottom="10px"
+            android:paddingLeft="30px" />
 
         <View
             android:id="@+id/divider"
