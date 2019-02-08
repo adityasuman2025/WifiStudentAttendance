@@ -22,6 +22,9 @@
         <activity
             android:name=".AttendanceQR"
             android:label="QR Code" />
+        <activity
+            android:name=".ViewAttendance"
+            android:label="View Attendance" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -16,7 +16,6 @@ import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import org.json.JSONArray;
-import org.w3c.dom.Text;
 
 import java.util.Arrays;
 
