@@ -15,13 +15,12 @@
         android:text="Your Registered Courses"
         android:textColor="@color/white"
         android:background="@color/colorAccent"
-
         />
 
     <ListView
         android:id="@+id/courseListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
     </ListView>
+    
 </LinearLayout>

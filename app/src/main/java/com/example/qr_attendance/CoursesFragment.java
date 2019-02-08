@@ -65,6 +65,7 @@ public class CoursesFragment extends Fragment
 
         final String user_id = decrypt(user_id_cookie);
 
+
     //checking if phone if connected to net or not
         ConnectivityManager connMgr = (ConnectivityManager) getActivity()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
