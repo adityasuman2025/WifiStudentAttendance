@@ -2,15 +2,18 @@ package com.example.qr_attendance;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -41,12 +44,18 @@ import java.util.concurrent.ExecutionException;
 public class ManageCourse extends AppCompatActivity
 {
 //defining variables
+    SharedPreferences sharedPreferences;
+
     TextView text;
+    String type;
 
     String data[];
+    String data1[];
 
     Spinner courseListSpinnner;
+    ListView deleteCourseLV;
     ArrayAdapter<String> adapter;
+    ArrayAdapter<String> adapter1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -56,6 +65,11 @@ public class ManageCourse extends AppCompatActivity
 
         text = findViewById(R.id.text);
         courseListSpinnner = findViewById(R.id.courseListSpinnner);
+        deleteCourseLV = findViewById(R.id.deleteCourseLV);
+
+    //getting the info of the logged user
+        sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        final String user_id_cookie = decrypt(sharedPreferences.getString("user_id", "DNE"));
 
     //checking if phone if connected to net or not
         ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -66,7 +80,7 @@ public class ManageCourse extends AppCompatActivity
             try
             {
             //getting the list of all courses in the database
-                String type = "get_courses";
+                type = "get_courses";
                 String get_courseResults = new ManageCoursesData().execute(type).get();
 
                 if(get_courseResults != "0" && get_courseResults != "-1" && get_courseResults != "Something went wrong")
@@ -88,6 +102,7 @@ public class ManageCourse extends AppCompatActivity
                         data[i+1] = course_code + " # " + course_id;
                     }
 
+                //showing the list of student courses present in the db (to show in the drop down menu for adding new courses)
                     adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, data);
                     courseListSpinnner.setAdapter(adapter);
 
@@ -100,9 +115,36 @@ public class ManageCourse extends AppCompatActivity
                             String selected = parentView.getItemAtPosition(position).toString();
                             String temp[] = selected.split(" # ");
 
-                            String course_id = temp[ temp.length - 1];
+                            String course_id = (temp[ temp.length - 1]).trim();
 
-                            text.setText(course_id);
+                        //inserting that course_id in the student_course table in the database
+                            type = "insert_student_course_in_db";
+
+                            if(course_id !="" && course_id != "0")
+                            {
+                                String insert_student_courseResult = null;
+                                try {
+                                    insert_student_courseResult = new ManageCoursesData().execute(type, user_id_cookie, course_id).get();
+                                    if(insert_student_courseResult.equals("1")) //if that course_id is successfully added
+                                    {
+                                    //reloading this activity
+                                        finish();
+                                        startActivity(getIntent());
+                                    }
+                                    else
+                                    {
+                                        text.setText("Something went wrong while adding that course");
+                                    }
+                                } catch (ExecutionException e) {
+                                    e.printStackTrace();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            else
+                            {
+                                text.setText("");
+                            }
                         }
 
                         @Override
@@ -116,11 +158,78 @@ public class ManageCourse extends AppCompatActivity
                 {
                     text.setText("Something went wrong while getting courses list");
                 }
+
+            //getting the list of all the courses of that student (to show in the list for deleting any course)
+                type = "get_user_courses";
+                String get_user_courses_result = (new courseData().execute(type, user_id_cookie).get());
+
+                if(!get_user_courses_result.equals("0") && !get_user_courses_result.equals("-1") && !get_user_courses_result.equals("Something went wrong"))
+                {
+                    //parse JSON data
+                    JSONArray ja = new JSONArray(get_user_courses_result);
+                    JSONObject jo = null;
+
+                    data1 = new String[ja.length()];
+
+                    for (int i =0; i<ja.length(); i++)
+                    {
+                        jo = ja.getJSONObject(i);
+
+                        String course_code = jo.getString("course_code");
+                        String course_id = jo.getString("id");
+
+                        String temp = course_code + " # " + course_id;
+
+                        data1[i] = temp;
+                    }
+
+                //listing courses in listview
+                    adapter1 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data1);
+                    deleteCourseLV.setAdapter(adapter1);
+                }
+
+            //on clicking on any list item under delete course
+                deleteCourseLV.setOnItemClickListener(new AdapterView.OnItemClickListener()
+                {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+                    {
+                    //creating cookie for course_id
+                        String listViewText = ((TextView)view).getText().toString();
+                        String temp[] = listViewText.split(" # ");
+
+                        String course_id_to_delete = temp[ temp.length - 1];
+
+                    //delete the course_id in the student_courses table
+                        try
+                        {
+                            type = "delete_course_id_from_student_courses";
+                            String delete_course_id_from_student_coursesResult = (new ManageCoursesData().execute(type, course_id_to_delete).get());
+
+                            if(delete_course_id_from_student_coursesResult.equals("1"))
+                            {
+                            //reloading this activity
+                                finish();
+                                startActivity(getIntent());
+                            }
+                            else
+                            {
+                                text.setText("Something went wrong while deleting course from student course");
+                            }
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (JSONException e)
+            {
+                text.setText("Something went wrong while listing the student courses form database");
                 e.printStackTrace();
             }
         }
@@ -128,6 +237,18 @@ public class ManageCourse extends AppCompatActivity
         {
             text.setText("Internet connection is not available");
         }
+    }
+
+//function for encrypting and decrypting the text
+    public static String encrypt(String input)
+    {
+        // This is base64 encoding, which is not an encryption
+        return Base64.encodeToString(input.getBytes(), Base64.DEFAULT);
+    }
+
+    public static String decrypt(String input)
+    {
+        return new String(Base64.decode(input, Base64.DEFAULT));
     }
 }
 
@@ -177,6 +298,112 @@ class ManageCoursesData extends AsyncTask<String,Void,String>
                 e.printStackTrace();
             }
         }
+        else if(type.equals("insert_student_course_in_db"))
+        {
+            String login_url = base_url + "insert_student_course_in_db.php";
+            try
+            {
+                String user_id_cookie = params[1];
+                String course_id = params[2];
+
+                //connecting with server
+                url = new URL(login_url);
+                HttpURLConnection httpURLConnection = null;
+                httpURLConnection = (HttpURLConnection)url.openConnection();
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.setDoInput(true);
+
+                //sending login info to the server
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+
+                String post_data = URLEncoder.encode("user_id","UTF-8")+"="+URLEncoder.encode(user_id_cookie,"UTF-8") + "&"
+                        + URLEncoder.encode("course_id", "UTF-8") + "=" + URLEncoder.encode(course_id, "UTF-8");
+
+                bufferedWriter.write(post_data);
+                bufferedWriter.flush();
+                bufferedWriter.close();
+                outputStream.close();
+
+                //getting the data coming from server after logging
+                InputStream inputStream = httpURLConnection.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
+
+                result="";
+                String line;
+
+                while((line = bufferedReader.readLine())!= null)
+                {
+                    result += (line);
+                }
+
+                bufferedReader.close();
+                inputStream.close();
+                httpURLConnection.disconnect();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else if(type.equals("delete_course_id_from_student_courses"))
+        {
+            String login_url = base_url + "delete_course_id_from_student_courses.php";
+            try
+            {
+                String course_id_to_delete = params[1];
+
+                //connecting with server
+                url = new URL(login_url);
+                HttpURLConnection httpURLConnection = null;
+                httpURLConnection = (HttpURLConnection)url.openConnection();
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.setDoInput(true);
+
+                //sending login info to the server
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+
+                String post_data = URLEncoder.encode("course_id","UTF-8")+"="+URLEncoder.encode(course_id_to_delete,"UTF-8");
+
+                bufferedWriter.write(post_data);
+                bufferedWriter.flush();
+                bufferedWriter.close();
+                outputStream.close();
+
+                //getting the data coming from server after logging
+                InputStream inputStream = httpURLConnection.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
+
+                result="";
+                String line;
+
+                while((line = bufferedReader.readLine())!= null)
+                {
+                    result += (line);
+                }
+
+                bufferedReader.close();
+                inputStream.close();
+                httpURLConnection.disconnect();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
         return result;
     }
 }

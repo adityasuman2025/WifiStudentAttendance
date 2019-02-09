@@ -45,6 +45,13 @@
             android:padding="10px"
             />
 
+        <ListView
+            android:id="@+id/deleteCourseLV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="50px">
+        </ListView>
+
     </LinearLayout>
 
 </RelativeLayout>

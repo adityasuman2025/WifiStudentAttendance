@@ -65,7 +65,6 @@ public class CoursesFragment extends Fragment
 
         final String user_id = decrypt(user_id_cookie);
 
-
     //checking if phone if connected to net or not
         ConnectivityManager connMgr = (ConnectivityManager) getActivity()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -79,39 +78,44 @@ public class CoursesFragment extends Fragment
             {
                 String get_user_courses_result = (new courseData().execute(type, user_id).get());
 
-            //parse JSON data
-                JSONArray ja = new JSONArray(get_user_courses_result);
-                JSONObject jo = null;
-
-                data = new String[ja.length()];
-
-                String temp_courses = "";
-                for (int i =0; i<ja.length(); i++)
+                if(!get_user_courses_result.equals("0") && !get_user_courses_result.equals("-1") && !get_user_courses_result.equals("Something went wrong"))
                 {
-                    jo = ja.getJSONObject(i);
+                    //parse JSON data
+                    JSONArray ja = new JSONArray(get_user_courses_result);
+                    JSONObject jo = null;
 
-                    String course_code = jo.getString("course_code");
-                    String course_id = jo.getString("id");
+                    data = new String[ja.length()];
 
-                    String temp = course_code + " # " + course_id;
-                    temp_courses += (temp + ",");
+                    String temp_courses = "";
+                    for (int i =0; i<ja.length(); i++)
+                    {
+                        jo = ja.getJSONObject(i);
 
-                    data[i] = temp;
+                        String course_code = jo.getString("course_code");
+                        String course_id = jo.getString("id");
+
+                        String temp = course_code + " # " + course_id;
+                        temp_courses += (temp + ",");
+
+                        data[i] = temp;
+                    }
+
+                    //listing courses in listview
+                    adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, data);
+                    courseListView.setAdapter(adapter);
+
+                    //creating cookie of the registered courses of that student
+                    editor.putString("studentCourses", temp_courses);
+                    editor.apply();
                 }
-
-            //listing courses in listview
-                adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, data);
-                courseListView.setAdapter(adapter);
-
-            //creating cookie of the registered courses of that student
-                editor.putString("studentCourses", temp_courses);
-                editor.apply();
-
-            } catch (ExecutionException e) {
+            } catch (ExecutionException e)
+            {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (JSONException e)
+            {
+                text.setText("Something went wrong while listing the student courses form database");
                 e.printStackTrace();
             }
         }

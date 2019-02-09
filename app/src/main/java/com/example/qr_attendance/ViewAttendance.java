@@ -88,7 +88,7 @@ public class ViewAttendance extends AppCompatActivity
                 String type= "get_student_attendance";
                 String get_user_courses_result = new getAttendanceData().execute(type, user_id_cookie, course_id_cookie).get();
 
-                if(get_user_courses_result != "0" && get_user_courses_result != "-1" && get_user_courses_result != "Something went wrong")
+                if(!get_user_courses_result.equals("0") && !get_user_courses_result.equals("-1") && !get_user_courses_result.equals("Something went wrong"))
                 {
                     //parse JSON and getting data
                     JSONArray ja = new JSONArray(get_user_courses_result);
