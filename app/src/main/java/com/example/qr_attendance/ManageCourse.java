@@ -1,6 +1,8 @@
 package com.example.qr_attendance;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -198,29 +200,48 @@ public class ManageCourse extends AppCompatActivity
                         String listViewText = ((TextView)view).getText().toString();
                         String temp[] = listViewText.split(" # ");
 
-                        String course_id_to_delete = temp[ temp.length - 1];
+                        final String course_id_to_delete = temp[ temp.length - 1];
 
-                    //delete the course_id in the student_courses table
-                        try
+                    //asking for confirm deletion by creating a dialog box
+                        new AlertDialog.Builder(ManageCourse.this)
+                        .setTitle("Confirm Deletion")
+                        .setMessage("Are you sure to delete this course from your registered courses")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener()
                         {
-                            type = "delete_course_id_from_student_courses";
-                            String delete_course_id_from_student_coursesResult = (new ManageCoursesData().execute(type, course_id_to_delete).get());
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i)
+                            {
+                                //delete the course_id in the student_courses table
+                                try
+                                {
+                                    type = "delete_course_id_from_student_courses";
+                                    String delete_course_id_from_student_coursesResult = (new ManageCoursesData().execute(type, course_id_to_delete).get());
 
-                            if(delete_course_id_from_student_coursesResult.equals("1"))
-                            {
-                            //reloading this activity
-                                finish();
-                                startActivity(getIntent());
+                                    if(delete_course_id_from_student_coursesResult.equals("1"))
+                                    {
+                                        //reloading this activity
+                                        finish();
+                                        startActivity(getIntent());
+                                    }
+                                    else
+                                    {
+                                        text.setText("Something went wrong while deleting course from student course");
+                                    }
+                                } catch (ExecutionException e) {
+                                    e.printStackTrace();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                            else
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i)
                             {
-                                text.setText("Something went wrong while deleting course from student course");
+                                dialogInterface.dismiss();
                             }
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        }).create().show();
                     }
                 });
             } catch (ExecutionException e) {
