@@ -32,7 +32,6 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
@@ -112,7 +111,7 @@ public class ViewAttendance extends AppCompatActivity
 
                     //formatting date in our desired format
                         Date course_from_date = new SimpleDateFormat("yyyy-MM-dd").parse(temp);
-                        DateFormat df = new SimpleDateFormat("dd MMM YYYY EEE");
+                        DateFormat df = new SimpleDateFormat("dd MMM yyyy EEE");
                         String strDate = df.format(course_from_date);
 
                         data[i] = strDate;
@@ -165,7 +164,6 @@ public class ViewAttendance extends AppCompatActivity
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-
         }
         else
         {

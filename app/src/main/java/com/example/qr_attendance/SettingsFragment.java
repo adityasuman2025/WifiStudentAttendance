@@ -85,8 +85,8 @@ public class SettingsFragment extends Fragment
                 JSONArray ja = new JSONArray(studentDetailsResults);
                 JSONObject jo = ja.getJSONObject(0);
 
-                String roll_no = jo.getString("name");
-                String name = jo.getString("roll_no");
+                String name = jo.getString("name");
+                String roll_no = jo.getString("roll_no");
 
                 studentDetails.setText("Name: " + name + "\nRoll No: " + roll_no);
 
