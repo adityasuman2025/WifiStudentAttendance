@@ -63,7 +63,7 @@ public class ViewFragment extends Fragment
         String user_id_cookie = sharedPreferences.getString("user_id", "DNE");
         editor = sharedPreferences.edit();
 
-        final String user_id = decrypt(user_id_cookie);
+        final String user_id = new Encryption().decrypt(user_id_cookie);
 
         //checking if phone if connected to net or not
         ConnectivityManager connMgr = (ConnectivityManager) getActivity()
@@ -76,7 +76,7 @@ public class ViewFragment extends Fragment
             String type = "get_user_courses";
             try
             {
-                String get_user_courses_result = (new courseData().execute(type, user_id).get());
+                String get_user_courses_result = (new DatabaseActions().execute(type, user_id).get());
 
                 //parse JSON data
                 JSONArray ja = new JSONArray(get_user_courses_result);
@@ -147,17 +147,5 @@ public class ViewFragment extends Fragment
         });
 
         return view;
-    }
-
-    //function for encrypting and decrypting the text
-    public static String encrypt(String input)
-    {
-        // This is base64 encoding, which is not an encryption
-        return Base64.encodeToString(input.getBytes(), Base64.DEFAULT);
-    }
-
-    public static String decrypt(String input)
-    {
-        return new String(Base64.decode(input, Base64.DEFAULT));
     }
 }

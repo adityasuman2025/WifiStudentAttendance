@@ -18,7 +18,7 @@
             android:name=".ManageCourse"
             android:label="Manage Courses" />
         <activity
-            android:name=".ListCourses"
+            android:name=".Dashboard"
             android:label="Student Dashboard" />
         <activity
             android:name=".Register"

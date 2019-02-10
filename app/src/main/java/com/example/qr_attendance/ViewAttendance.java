@@ -72,7 +72,7 @@ public class ViewAttendance extends AppCompatActivity
 
         //to get the cookie values
         sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        String user_id_cookie = decrypt(sharedPreferences.getString("user_id", "DNE"));
+        String user_id_cookie = new Encryption().decrypt(sharedPreferences.getString("user_id", "DNE"));
         String course_id_cookie = sharedPreferences.getString("course_id", "DNE");
 
         //checking if phone if connected to net or not
@@ -85,7 +85,7 @@ public class ViewAttendance extends AppCompatActivity
             {
             //to get attendance details for a student and course
                 String type= "get_student_attendance";
-                String get_user_courses_result = new getAttendanceData().execute(type, user_id_cookie, course_id_cookie).get();
+                String get_user_courses_result = new DatabaseActions().execute(type, user_id_cookie, course_id_cookie).get();
 
                 if(!get_user_courses_result.equals("0") && !get_user_courses_result.equals("-1") && !get_user_courses_result.equals("Something went wrong"))
                 {
@@ -123,7 +123,7 @@ public class ViewAttendance extends AppCompatActivity
 
                     //to get class dates for a course
                     type= "get_course_class_count";
-                    String get_course_class_count_result = (new getAttendanceData().execute(type, course_id_cookie).get());
+                    String get_course_class_count_result = (new DatabaseActions().execute(type, course_id_cookie).get());
 
                     if(get_course_class_count_result != "0" && get_course_class_count_result != "-1" && get_course_class_count_result != "Something went wrong")
                     {
@@ -169,176 +169,5 @@ public class ViewAttendance extends AppCompatActivity
         {
             qr_text.setText("Internet connection is not available");
         }
-    }
-
-    //function for encrypting and decrypting the text
-    public static String encrypt(String input)
-    {
-        // This is base64 encoding, which is not an encryption
-        return Base64.encodeToString(input.getBytes(), Base64.DEFAULT);
-    }
-
-    public static String decrypt(String input)
-    {
-        return new String(Base64.decode(input, Base64.DEFAULT));
-    }
-}
-
-class getAttendanceData extends AsyncTask<String,Void,String>
-{
-    String base_url = "http://mngo.in/qr_attendance/";
-
-    @Override
-    protected String doInBackground(String... params)
-    {
-        String type = params[0];
-        String result = "Something went wrong";
-        URL url;
-
-        if(type.equals("get_student_attendance"))
-        {
-            String login_url = base_url + "get_student_attendance.php";
-            try
-            {
-                String user_id = params[1];
-                String course_id = params[2];
-
-                //connecting with server
-                url = new URL(login_url);
-                HttpURLConnection httpURLConnection = null;
-                httpURLConnection = (HttpURLConnection)url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoOutput(true);
-                httpURLConnection.setDoInput(true);
-
-                //sending login info to the server
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-
-                String post_data = URLEncoder.encode("user_id","UTF-8")+"="+URLEncoder.encode(user_id,"UTF-8") + "&"
-                        + URLEncoder.encode("course_id", "UTF-8") + "=" + URLEncoder.encode(course_id, "UTF-8");
-
-                bufferedWriter.write(post_data);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-                outputStream.close();
-
-                //getting the data coming from server after logging
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
-
-                result="";
-                String line;
-
-                while((line = bufferedReader.readLine())!= null)
-                {
-                    result += (line);
-                }
-
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else if(type.equals("get_course_class_count"))
-        {
-            String login_url = base_url + "get_course_class_count.php";
-
-            try
-            {
-                String course_id = params[1];
-
-                //connecting with server
-                url = new URL(login_url);
-                HttpURLConnection httpURLConnection = null;
-                httpURLConnection = (HttpURLConnection)url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoOutput(true);
-                httpURLConnection.setDoInput(true);
-
-                //sending login info to the server
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-
-                String post_data = URLEncoder.encode("course_id","UTF-8")+"="+URLEncoder.encode(course_id,"UTF-8");
-
-                bufferedWriter.write(post_data);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-                outputStream.close();
-
-                //getting the data coming from server after logging
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
-
-                result="";
-                String line;
-
-                while((line = bufferedReader.readLine())!= null)
-                {
-                    result += (line);
-                }
-
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return result;
-    }
-}
-
-//class to get count of no of days between two dates
-class Date_class
-{
-//function to count no of days between two dates
-    public static int getWorkingDaysBetweenTwoDates(Date startDate, Date endDate) {
-        Calendar startCal = Calendar.getInstance();
-        startCal.setTime(startDate);
-
-        Calendar endCal = Calendar.getInstance();
-        endCal.setTime(endDate);
-
-        int workDays = 0;
-
-        //Return 0 if start and end are the same
-        if (startCal.getTimeInMillis() == endCal.getTimeInMillis()) {
-            return 0;
-        }
-
-        if (startCal.getTimeInMillis() > endCal.getTimeInMillis()) {
-            startCal.setTime(endDate);
-            endCal.setTime(startDate);
-        }
-
-        do
-         {
-            //excluding start date
-             startCal.add(Calendar.DAY_OF_MONTH, 1);
-             ++workDays;
-
-//            if (startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
-//                ++workDays;
-//            }
-        } while (startCal.getTimeInMillis() < endCal.getTimeInMillis()); //excluding end date
-
-        return workDays;
     }
 }

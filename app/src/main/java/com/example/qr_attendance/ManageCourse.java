@@ -71,7 +71,7 @@ public class ManageCourse extends AppCompatActivity
 
     //getting the info of the logged user
         sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        final String user_id_cookie = decrypt(sharedPreferences.getString("user_id", "DNE"));
+        final String user_id_cookie = new Encryption().decrypt(sharedPreferences.getString("user_id", "DNE"));
 
     //checking if phone if connected to net or not
         ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -83,7 +83,7 @@ public class ManageCourse extends AppCompatActivity
             {
             //getting the list of all courses in the database
                 type = "get_courses";
-                String get_courseResults = new ManageCoursesData().execute(type).get();
+                String get_courseResults = new DatabaseActions().execute(type).get();
 
                 if(get_courseResults != "0" && get_courseResults != "-1" && get_courseResults != "Something went wrong")
                 {
@@ -126,7 +126,7 @@ public class ManageCourse extends AppCompatActivity
                             {
                                 String insert_student_courseResult = null;
                                 try {
-                                    insert_student_courseResult = new ManageCoursesData().execute(type, user_id_cookie, course_id).get();
+                                    insert_student_courseResult = new DatabaseActions().execute(type, user_id_cookie, course_id).get();
                                     if(insert_student_courseResult.equals("1")) //if that course_id is successfully added
                                     {
                                     //reloading this activity
@@ -163,7 +163,7 @@ public class ManageCourse extends AppCompatActivity
 
             //getting the list of all the courses of that student (to show in the list for deleting any course)
                 type = "get_user_courses";
-                String get_user_courses_result = (new courseData().execute(type, user_id_cookie).get());
+                String get_user_courses_result = (new DatabaseActions().execute(type, user_id_cookie).get());
 
                 if(!get_user_courses_result.equals("0") && !get_user_courses_result.equals("-1") && !get_user_courses_result.equals("Something went wrong"))
                 {
@@ -215,7 +215,7 @@ public class ManageCourse extends AppCompatActivity
                                 try
                                 {
                                     type = "delete_course_id_from_student_courses";
-                                    String delete_course_id_from_student_coursesResult = (new ManageCoursesData().execute(type, course_id_to_delete).get());
+                                    String delete_course_id_from_student_coursesResult = (new DatabaseActions().execute(type, course_id_to_delete, user_id_cookie).get());
 
                                     if(delete_course_id_from_student_coursesResult.equals("1"))
                                     {
@@ -258,173 +258,5 @@ public class ManageCourse extends AppCompatActivity
         {
             text.setText("Internet connection is not available");
         }
-    }
-
-//function for encrypting and decrypting the text
-    public static String encrypt(String input)
-    {
-        // This is base64 encoding, which is not an encryption
-        return Base64.encodeToString(input.getBytes(), Base64.DEFAULT);
-    }
-
-    public static String decrypt(String input)
-    {
-        return new String(Base64.decode(input, Base64.DEFAULT));
-    }
-}
-
-class ManageCoursesData extends AsyncTask<String,Void,String>
-{
-    String base_url = "http://mngo.in/qr_attendance/";
-
-    @Override
-    protected String doInBackground(String... params)
-    {
-        String type = params[0];
-        String result = "Something went wrong";
-        URL url;
-
-        if(type.equals("get_courses"))
-        {
-            String login_url = base_url + "get_courses.php";
-            try
-            {
-                //connecting with server
-                url = new URL(login_url);
-                HttpURLConnection httpURLConnection = null;
-                httpURLConnection = (HttpURLConnection)url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoOutput(true);
-
-                //getting the data coming from server
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
-
-                result="";
-                String line;
-
-                while((line = bufferedReader.readLine())!= null) {
-                    result += line;
-                }
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else if(type.equals("insert_student_course_in_db"))
-        {
-            String login_url = base_url + "insert_student_course_in_db.php";
-            try
-            {
-                String user_id_cookie = params[1];
-                String course_id = params[2];
-
-                //connecting with server
-                url = new URL(login_url);
-                HttpURLConnection httpURLConnection = null;
-                httpURLConnection = (HttpURLConnection)url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoOutput(true);
-                httpURLConnection.setDoInput(true);
-
-                //sending login info to the server
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-
-                String post_data = URLEncoder.encode("user_id","UTF-8")+"="+URLEncoder.encode(user_id_cookie,"UTF-8") + "&"
-                        + URLEncoder.encode("course_id", "UTF-8") + "=" + URLEncoder.encode(course_id, "UTF-8");
-
-                bufferedWriter.write(post_data);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-                outputStream.close();
-
-                //getting the data coming from server after logging
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
-
-                result="";
-                String line;
-
-                while((line = bufferedReader.readLine())!= null)
-                {
-                    result += (line);
-                }
-
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else if(type.equals("delete_course_id_from_student_courses"))
-        {
-            String login_url = base_url + "delete_course_id_from_student_courses.php";
-            try
-            {
-                String course_id_to_delete = params[1];
-
-                //connecting with server
-                url = new URL(login_url);
-                HttpURLConnection httpURLConnection = null;
-                httpURLConnection = (HttpURLConnection)url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoOutput(true);
-                httpURLConnection.setDoInput(true);
-
-                //sending login info to the server
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-
-                String post_data = URLEncoder.encode("course_id","UTF-8")+"="+URLEncoder.encode(course_id_to_delete,"UTF-8");
-
-                bufferedWriter.write(post_data);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-                outputStream.close();
-
-                //getting the data coming from server after logging
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
-
-                result="";
-                String line;
-
-                while((line = bufferedReader.readLine())!= null)
-                {
-                    result += (line);
-                }
-
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        return result;
     }
 }

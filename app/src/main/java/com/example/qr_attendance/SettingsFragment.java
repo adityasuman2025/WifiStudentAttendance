@@ -65,7 +65,7 @@ public class SettingsFragment extends Fragment
         String user_id_cookie = sharedPreferences.getString("user_id", "DNE");
         editor = sharedPreferences.edit();
 
-        String user_id = decrypt(user_id_cookie);
+        String user_id = new Encryption().decrypt(user_id_cookie);
 
     //checking if phone if connected to net or not
         ConnectivityManager connMgr = (ConnectivityManager) getActivity()
@@ -79,7 +79,7 @@ public class SettingsFragment extends Fragment
             try
             {
                 String type = "get_student_details";
-                studentDetailsResults = new getStudentDetails().execute(type, user_id).get();
+                studentDetailsResults = new DatabaseActions().execute(type, user_id).get();
 
                 //parse JSON and getting data
                 JSONArray ja = new JSONArray(studentDetailsResults);
@@ -145,81 +145,5 @@ public class SettingsFragment extends Fragment
         });
 
         return view;
-    }
-
-//function for encrypting and decrypting the text
-    public static String encrypt(String input)
-    {
-        // This is base64 encoding, which is not an encryption
-        return Base64.encodeToString(input.getBytes(), Base64.DEFAULT);
-    }
-
-    public static String decrypt(String input)
-    {
-        return new String(Base64.decode(input, Base64.DEFAULT));
-    }
-}
-
-class getStudentDetails extends AsyncTask<String,Void,String>
-{
-    String base_url = "http://mngo.in/qr_attendance/";
-
-    @Override
-    protected String doInBackground(String... params)
-    {
-        String type = params[0];
-        String result = "Something went wrong";
-        URL url;
-
-        if(type.equals("get_student_details"))
-        {
-            String login_url = base_url + "get_student_details.php";
-            try
-            {
-                String user_id = params[1];
-
-                //connecting with server
-                url = new URL(login_url);
-                HttpURLConnection httpURLConnection = null;
-                httpURLConnection = (HttpURLConnection)url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoOutput(true);
-                httpURLConnection.setDoInput(true);
-
-                //sending data to the server
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-
-                String post_data = URLEncoder.encode("user_id","UTF-8")+"="+URLEncoder.encode(user_id,"UTF-8");
-
-                bufferedWriter.write(post_data);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-                outputStream.close();
-
-                //getting the data coming from server
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
-
-                result="";
-                String line;
-
-                while((line = bufferedReader.readLine())!= null) {
-                    result += line;
-                }
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return result;
     }
 }

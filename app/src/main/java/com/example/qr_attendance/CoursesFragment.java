@@ -63,7 +63,7 @@ public class CoursesFragment extends Fragment
         String user_id_cookie = sharedPreferences.getString("user_id", "DNE");
         editor = sharedPreferences.edit();
 
-        final String user_id = decrypt(user_id_cookie);
+        final String user_id = new Encryption().decrypt(user_id_cookie);
 
     //checking if phone if connected to net or not
         ConnectivityManager connMgr = (ConnectivityManager) getActivity()
@@ -76,7 +76,7 @@ public class CoursesFragment extends Fragment
             String type = "get_user_courses";
             try
             {
-                String get_user_courses_result = (new courseData().execute(type, user_id).get());
+                String get_user_courses_result = (new DatabaseActions().execute(type, user_id).get());
 
                 if(!get_user_courses_result.equals("0") && !get_user_courses_result.equals("-1") && !get_user_courses_result.equals("Something went wrong"))
                 {
@@ -140,9 +140,11 @@ public class CoursesFragment extends Fragment
                 String listViewText = ((TextView)view).getText().toString();
                 String temp[] = listViewText.split(" # ");
 
-                String course_id_cookie = temp[ temp.length - 1];
+                String course_code_cookie = temp[0];
+                String course_id_cookie = temp[temp.length - 1];
 
                 editor.putString("course_id", course_id_cookie);
+                editor.putString("course_code", course_code_cookie);
                 editor.apply();
 
             //redirecting to the qr code generator page
@@ -152,83 +154,5 @@ public class CoursesFragment extends Fragment
         });
 
         return view;
-    }
-
-//function for encrypting and decrypting the text
-    public static String encrypt(String input)
-    {
-        // This is base64 encoding, which is not an encryption
-        return Base64.encodeToString(input.getBytes(), Base64.DEFAULT);
-    }
-
-    public static String decrypt(String input)
-    {
-        return new String(Base64.decode(input, Base64.DEFAULT));
-    }
-}
-
-class courseData extends AsyncTask<String,Void,String>
-{
-    String base_url = "http://mngo.in/qr_attendance/";
-
-    @Override
-    protected String doInBackground(String... params)
-    {
-        String type = params[0];
-        String result = "Something went wrong";
-        URL url;
-
-        if(type.equals("get_user_courses"))
-        {
-            String login_url = base_url + "get_user_courses.php";
-            try
-            {
-                String user_id = params[1];
-
-                //connecting with server
-                url = new URL(login_url);
-                HttpURLConnection httpURLConnection = null;
-                httpURLConnection = (HttpURLConnection)url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoOutput(true);
-                httpURLConnection.setDoInput(true);
-
-                //sending login info to the server
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-
-                String post_data = URLEncoder.encode("user_id","UTF-8")+"="+URLEncoder.encode(user_id,"UTF-8");
-
-                bufferedWriter.write(post_data);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-                outputStream.close();
-
-                //getting the data coming from server after logging
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
-
-                result="";
-                String line;
-
-                while((line = bufferedReader.readLine())!= null)
-                {
-                    result += (line + "\n");
-                }
-
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return result;
     }
 }

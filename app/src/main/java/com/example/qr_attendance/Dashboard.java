@@ -7,13 +7,13 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-public class ListCourses extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener
+public class Dashboard extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener
 {
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_courses);
+        setContentView(R.layout.activity_dashboard);
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(this);
