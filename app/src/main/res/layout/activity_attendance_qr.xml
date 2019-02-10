@@ -18,7 +18,7 @@
             android:textColor="@color/colorAccent"
             android:textSize="100px"
             android:textStyle="bold"
-            android:layout_marginTop="50px"/>
+            android:layout_marginTop="10px"/>
 
         <TextView
             android:id="@+id/qr_text"
@@ -28,7 +28,7 @@
         <ImageView
             android:id="@+id/qr_view"
             android:layout_width="match_parent"
-            android:layout_height="1000px" />
+            android:layout_height="900px" />
     </LinearLayout>
 
     <TextView
@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="50px"
-        android:textSize="80px"/>
+        android:layout_marginBottom="20px"
+        android:textSize="70px"/>
 
 </RelativeLayout>
