@@ -52,7 +52,10 @@ public class ManageCourse extends AppCompatActivity
     String type;
 
     String data[];
+    String course_ids[];
+
     String data1[];
+    String course_ids1[];
 
     Spinner courseListSpinnner;
     ListView deleteCourseLV;
@@ -87,12 +90,14 @@ public class ManageCourse extends AppCompatActivity
 
                 if(get_courseResults != "0" && get_courseResults != "-1" && get_courseResults != "Something went wrong")
                 {
-                //parse JSON and getting data
+                ///parse JSON and getting data
                     JSONArray ja = new JSONArray(get_courseResults);
                     JSONObject jo = null;
 
                     data = new String[ja.length() + 1];
+                    course_ids = new String[ja.length() + 1];
                     data[0] = "";
+                    course_ids[0] = "";
 
                     for (int i = 0; i < ja.length(); i++)
                     {
@@ -101,7 +106,8 @@ public class ManageCourse extends AppCompatActivity
                         String course_id = jo.getString("id");
                         String course_code = jo.getString("course_code");
 
-                        data[i+1] = course_code + " # " + course_id;
+                        data[i+1] = course_code;
+                        course_ids[i+1] = course_id;
                     }
 
                 //showing the list of student courses present in the db (to show in the drop down menu for adding new courses)
@@ -114,10 +120,9 @@ public class ManageCourse extends AppCompatActivity
                         @Override
                         public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id)
                         {
-                            String selected = parentView.getItemAtPosition(position).toString();
-                            String temp[] = selected.split(" # ");
+//                            String selected = parentView.getItemAtPosition(position).toString();
 
-                            String course_id = (temp[ temp.length - 1]).trim();
+                            String course_id = (course_ids[position]).trim();
 
                         //inserting that course_id in the student_course table in the database
                             type = "insert_student_course_in_db";
@@ -172,6 +177,7 @@ public class ManageCourse extends AppCompatActivity
                     JSONObject jo = null;
 
                     data1 = new String[ja.length()];
+                    course_ids1 = new String[ja.length()];
 
                     for (int i =0; i<ja.length(); i++)
                     {
@@ -180,9 +186,8 @@ public class ManageCourse extends AppCompatActivity
                         String course_code = jo.getString("course_code");
                         String course_id = jo.getString("id");
 
-                        String temp = course_code + " # " + course_id;
-
-                        data1[i] = temp;
+                        data1[i] = course_code;
+                        course_ids1[i] = course_id;
                     }
 
                 //listing courses in listview
@@ -196,11 +201,11 @@ public class ManageCourse extends AppCompatActivity
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
                     {
-                    //creating cookie for course_id
-                        String listViewText = ((TextView)view).getText().toString();
-                        String temp[] = listViewText.split(" # ");
+                        //getting the course_id of selected item
+//                        String listViewText = ((TextView)view).getText().toString();
+//                        String temp[] = listViewText.split(" # ");
 
-                        final String course_id_to_delete = temp[ temp.length - 1];
+                        final String course_id_to_delete = course_ids1[i];
 
                     //asking for confirm deletion by creating a dialog box
                         new AlertDialog.Builder(ManageCourse.this)

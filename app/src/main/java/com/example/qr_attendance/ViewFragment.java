@@ -47,6 +47,10 @@ public class ViewFragment extends Fragment
     TextView text;
 
     String data[];
+    String course_ids[];
+    String old_saved_courses[];
+    String old_saved_courseIDs[];
+
     ListView courseListView;
     ArrayAdapter<String> adapter;
 
@@ -68,7 +72,7 @@ public class ViewFragment extends Fragment
         //checking if phone if connected to net or not
         ConnectivityManager connMgr = (ConnectivityManager) getActivity()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        final NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
         if (networkInfo != null && networkInfo.isConnected()) //phone is connected
         {
@@ -78,13 +82,15 @@ public class ViewFragment extends Fragment
             {
                 String get_user_courses_result = (new DatabaseActions().execute(type, user_id).get());
 
-                //parse JSON data
+            //parse JSON data
                 JSONArray ja = new JSONArray(get_user_courses_result);
                 JSONObject jo = null;
 
                 data = new String[ja.length()];
+                course_ids = new String[ja.length()];
 
                 String temp_courses = "";
+                String temp_course_ids = "";
                 for (int i =0; i<ja.length(); i++)
                 {
                     jo = ja.getJSONObject(i);
@@ -92,10 +98,12 @@ public class ViewFragment extends Fragment
                     String course_code = jo.getString("course_code");
                     String course_id = jo.getString("id");
 
-                    String temp = course_code + " # " + course_id;
-                    temp_courses += (temp + ",");
+                    //String temp = course_code + " # " + course_id;
+                    temp_courses += (course_code + ",");
+                    temp_course_ids += (course_id + ",");
 
-                    data[i] = temp;
+                    data[i] = course_code;
+                    course_ids[i] = course_id;
                 }
 
                 //listing courses in listview
@@ -104,6 +112,7 @@ public class ViewFragment extends Fragment
 
                 //creating cookie of the registered courses of that student
                 editor.putString("studentCourses", temp_courses);
+                editor.putString("studentCoursesIDs", temp_course_ids);
                 editor.apply();
 
             } catch (ExecutionException e) {
@@ -117,8 +126,9 @@ public class ViewFragment extends Fragment
         else //phone is not connected to internet
         {
             String studentCourses_cookie = sharedPreferences.getString("studentCourses", null);
-
-            String old_saved_courses[] = studentCourses_cookie.split(",");
+            String studentCoursesIDs_cookie = sharedPreferences.getString("studentCoursesIDs", null);
+            old_saved_courses = studentCourses_cookie.split(",");
+            old_saved_courseIDs = studentCoursesIDs_cookie.split(",");
 
             //listing courses in listview
             adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, old_saved_courses);
@@ -131,13 +141,22 @@ public class ViewFragment extends Fragment
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
             {
-            //creating cookie for course_id
-                String listViewText = ((TextView)view).getText().toString();
-                String temp[] = listViewText.split(" # ");
+                String course_id_cookie;
+                String course_code_cookie;
 
-                String course_id_cookie = temp[ temp.length - 1];
+                if(networkInfo != null && networkInfo.isConnected()) //phone is connected
+                {
+                    course_code_cookie = data[i];
+                    course_id_cookie = course_ids[i];
+                }
+                else
+                {
+                    course_code_cookie = old_saved_courses[i];
+                    course_id_cookie = old_saved_courseIDs[i];
+                }
 
                 editor.putString("course_id", course_id_cookie);
+                editor.putString("course_code", course_code_cookie);
                 editor.apply();
 
                 //redirecting to the qr code generator page
