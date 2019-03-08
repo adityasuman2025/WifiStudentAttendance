@@ -11,6 +11,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -29,9 +30,15 @@ public class MainActivity extends AppCompatActivity {
     TextView login_feed;
 
     SharedPreferences sharedPreferences;
+
     String androidId;
     String uniqueID;
 
+    int androidVersion;
+
+    int PERMISSION_CODE = 1;
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,68 +68,92 @@ public class MainActivity extends AppCompatActivity {
         //to get unique identification of a phone and displaying it
         androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID); // android id
 
-        uniqueID = Build.SERIAL;
-
-    //on clicking on login button
-        login_btn.setOnClickListener(new View.OnClickListener()
+        // Permission is not granted of READ_PHONE_STATE
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
         {
-            @Override
-            public void onClick(View view)
+            //asking for grating the permission
+            login_btn.setOnClickListener(new View.OnClickListener()
             {
-                String roll_no = roll_no_input.getText().toString().toUpperCase();
-                String password = password_input.getText().toString();
-                String type = "verify_login";
-
-            //checking if phone if connected to net or not
-                ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-                if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
-                        connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED)
+                @Override
+                public void onClick(View view)
                 {
-                //trying to login the user
-                    try
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, PERMISSION_CODE);
+                }
+            });
+        }
+        // Permission is granted
+        else
+        {
+            androidVersion = android.os.Build.VERSION.SDK_INT;
+
+            if (androidVersion < 28) //less than 9 (SDK: 29)
+            {
+                uniqueID = android.os.Build.SERIAL; // Serial_no
+            } else {
+                uniqueID = Build.getSerial();
+            }
+
+        //on clicking on login button
+            login_btn.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    String roll_no = roll_no_input.getText().toString().toUpperCase();
+                    String password = password_input.getText().toString();
+                    String type = "verify_login";
+
+                    //checking if phone if connected to net or not
+                    ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+                    if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                            connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED)
                     {
-                        String login_result = new DatabaseActions().execute(type, roll_no, password, androidId, uniqueID).get();
-
-                        if(login_result.equals("-1"))
+                        //trying to login the user
+                        try
                         {
-                            login_feed.setText("Database issue found");
-                        }
-                        else if(login_result.equals("Something went wrong"))
-                        {
-                            login_feed.setText(login_result);
-                        }
-                        else if(Integer.parseInt(login_result)> 0)
-                        {
-                            //creating cookie of the logged in user
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString("roll_no", new Encryption().encrypt(roll_no));
-                            editor.putString("user_id", new Encryption().encrypt(login_result));
-                            editor.apply();
+                            String login_result = new DatabaseActions().execute(type, roll_no, password, androidId, uniqueID).get();
 
-                            //login_feed.setText(Integer.toString(login_result));
+                            if(login_result.equals("-1"))
+                            {
+                                login_feed.setText("Database issue found");
+                            }
+                            else if(login_result.equals("Something went wrong"))
+                            {
+                                login_feed.setText(login_result);
+                            }
+                            else if(Integer.parseInt(login_result)> 0)
+                            {
+                                //creating cookie of the logged in user
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString("roll_no", new Encryption().encrypt(roll_no));
+                                editor.putString("user_id", new Encryption().encrypt(login_result));
+                                editor.apply();
 
-                            //redirecting the list course page
-                            Intent ListCourseIntent = new Intent(MainActivity.this, Dashboard.class);
-                            startActivity(ListCourseIntent);
-                            finish(); //used to delete the last activity history which we don't want to delete
-                        }
-                        else
-                        {
-                            login_feed.setText("Your login credentials may be incorrect or this may be not your registered phone.");
-                        }
+                                //login_feed.setText(Integer.toString(login_result));
 
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                                //redirecting the list course page
+                                Intent ListCourseIntent = new Intent(MainActivity.this, Dashboard.class);
+                                startActivity(ListCourseIntent);
+                                finish(); //used to delete the last activity history which we don't want to delete
+                            }
+                            else
+                            {
+                                login_feed.setText("Your login credentials may be incorrect or this may be not your registered phone.");
+                            }
+
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else
+                    {
+                        login_feed.setText("Internet connection is not available");
                     }
                 }
-                else
-                {
-                    login_feed.setText("Internet connection is not available");
-                }
-            }
-        });
+            });
+        }
 
     //on clicking on register button
         register_btn.setOnClickListener(new View.OnClickListener()
