@@ -66,37 +66,60 @@ public class Register extends AppCompatActivity
                     //check if that phone is already registered or not
                         String type = "check_phone_registered";
                         try {
-                            int check_phone_result = Integer.parseInt(new DatabaseActions().execute(type, androidId, uniqueID).get());
+                            String check_phone_result = new DatabaseActions().execute(type, androidId, uniqueID).get();
 
-                            if (check_phone_result == 1)//yes phone is already registered
+                            if (check_phone_result.equals("1"))//yes phone is already registered
                             {
                                 reg_feed.setText("This phone is already registered for a student.");
-                            } else if (check_phone_result == -1) {
+                            }
+                            else if (check_phone_result.equals("-1"))
+                            {
                                 reg_feed.setText("Database issue found");
-                            } else {
+                            }
+                            else if (check_phone_result.equals("Something went wrong"))
+                            {
+                                reg_feed.setText(check_phone_result);
+                            }
+                            else
+                            {
                                 //checking if all input fields have been filled or not
-                                if (reg_name.length() != 0 && reg_roll.length() != 0) {
+                                if (reg_name.length() != 0 && reg_roll.length() != 0)
+                                {
                                     //check if that roll number is already registered or not
                                     type = "check_roll_exist";
-                                    int check_roll_result = Integer.parseInt(new DatabaseActions().execute(type, reg_roll).get());
+                                    String check_roll_result = new DatabaseActions().execute(type, reg_roll).get();
 
-                                    if (check_roll_result == 1)//yes roll number already exist
+                                    if(check_roll_result.equals("1"))//yes roll number already exist
                                     {
                                         reg_feed.setText("This Roll Number is already registered.");
-                                    } else if (check_roll_result == -1) {
+                                    } else if (check_roll_result.equals("-1")) {
                                         reg_feed.setText("Database issue found");
-                                    } else {
+                                    }
+                                    else if (check_roll_result.equals("Something went wrong"))
+                                    {
+                                        reg_feed.setText(check_roll_result);
+                                    }
+                                    else
+                                    {
                                         //if everything fine then registering the new user in the databse
                                         type = "register_new_user_in_db";
-                                        int register_new_user_result = Integer.parseInt(new DatabaseActions().execute(type, reg_roll, reg_name, reg_pass, androidId, uniqueID).get());
+                                        String register_new_user_result = new DatabaseActions().execute(type, reg_roll, reg_name, reg_pass, androidId, uniqueID).get();
 
-                                        if (register_new_user_result > 0)//successfully registered
+                                        if (register_new_user_result.equals("-1"))
+                                        {
+                                            reg_feed.setText("Database issue found");
+                                        }
+                                        else if(register_new_user_result.equals("Something went wrong"))
+                                        {
+                                            reg_feed.setText(register_new_user_result);
+                                        }
+                                        else if (Integer.parseInt(register_new_user_result)> 0)//successfully registered
                                         {
                                             //creating cookie of the logged in user
                                             sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
                                             SharedPreferences.Editor editor = sharedPreferences.edit();
                                             editor.putString("roll_no", new Encryption().encrypt(reg_roll));
-                                            editor.putString("user_id", new Encryption().encrypt(Integer.toString(register_new_user_result)));
+                                            editor.putString("user_id", new Encryption().encrypt(register_new_user_result));
                                             editor.apply();
 
                                             //reg_feed.setText("Successfully registered");
@@ -105,8 +128,6 @@ public class Register extends AppCompatActivity
                                             Intent ListCourseIntent = new Intent(Register.this, Dashboard.class);
                                             startActivity(ListCourseIntent);
                                             finish(); //used to delete the last activity history which we want to delete
-                                        } else if (register_new_user_result == -1) {
-                                            reg_feed.setText("Database issue found");
                                         } else {
                                             reg_feed.setText("Something went wrong registering user");
                                         }

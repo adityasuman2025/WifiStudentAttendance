@@ -1,11 +1,16 @@
 package com.example.qr_attendance;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,9 +20,8 @@ import android.widget.TextView;
 
 import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity
-{
-//defining variables
+public class MainActivity extends AppCompatActivity {
+    //defining variables
     Button login_btn;
     Button register_btn;
     EditText roll_no_input;
@@ -29,8 +33,7 @@ public class MainActivity extends AppCompatActivity
     String uniqueID;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -40,25 +43,25 @@ public class MainActivity extends AppCompatActivity
         password_input = findViewById(R.id.password_input);
         login_feed = findViewById(R.id.login_feed);
 
-    //checking if already loggedIn or not
+        //checking if already loggedIn or not
         sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         String user_id_cookie = sharedPreferences.getString("user_id", "DNE");
 
-        if(user_id_cookie.equals("DNE"))
-        {
+        if (user_id_cookie.equals("DNE")) {
             //login_feed.setText("No one is logged in");
         }
         else //if someone is already logged in
         {
-        //redirecting the list course page
+            //redirecting the list course page
             Intent ListCourseIntent = new Intent(MainActivity.this, Dashboard.class);
             startActivity(ListCourseIntent);
             finish(); //used to delete the last activity history which we want to delete
         }
 
-    //to get unique identification of a phone and displaying it
+        //to get unique identification of a phone and displaying it
         androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID); // android id
-        uniqueID = android.os.Build.SERIAL; // Serial_no
+
+        uniqueID = Build.SERIAL;
 
     //on clicking on login button
         login_btn.setOnClickListener(new View.OnClickListener()
@@ -78,14 +81,22 @@ public class MainActivity extends AppCompatActivity
                 //trying to login the user
                     try
                     {
-                        int login_result = Integer.parseInt(new DatabaseActions().execute(type, roll_no, password, androidId, uniqueID).get());
+                        String login_result = new DatabaseActions().execute(type, roll_no, password, androidId, uniqueID).get();
 
-                        if(login_result > 0)
+                        if(login_result.equals("-1"))
+                        {
+                            login_feed.setText("Database issue found");
+                        }
+                        else if(login_result.equals("Something went wrong"))
+                        {
+                            login_feed.setText(login_result);
+                        }
+                        else if(Integer.parseInt(login_result)> 0)
                         {
                             //creating cookie of the logged in user
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putString("roll_no", new Encryption().encrypt(roll_no));
-                            editor.putString("user_id", new Encryption().encrypt(Integer.toString(login_result)));
+                            editor.putString("user_id", new Encryption().encrypt(login_result));
                             editor.apply();
 
                             //login_feed.setText(Integer.toString(login_result));
@@ -94,10 +105,6 @@ public class MainActivity extends AppCompatActivity
                             Intent ListCourseIntent = new Intent(MainActivity.this, Dashboard.class);
                             startActivity(ListCourseIntent);
                             finish(); //used to delete the last activity history which we don't want to delete
-                        }
-                        else if(login_result == -1)
-                        {
-                            login_feed.setText("Database issue found");
                         }
                         else
                         {
