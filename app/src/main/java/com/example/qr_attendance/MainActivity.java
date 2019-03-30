@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
     //defining variables
     Button login_btn;
     Button register_btn;
+    Button forgot_pass_btn;
+
     EditText roll_no_input;
     EditText password_input;
     TextView login_feed;
@@ -47,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
 
         login_btn = findViewById(R.id.login_btn);
         register_btn = findViewById(R.id.register_btn);
+        forgot_pass_btn = findViewById(R.id.forgot_pass_btn);
+
         roll_no_input = findViewById(R.id.roll_no_input);
         password_input = findViewById(R.id.password_input);
         login_feed = findViewById(R.id.login_feed);
@@ -162,6 +166,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view)
             {
+                Intent RegisterIntent = new Intent(MainActivity.this, Register.class);
+                startActivity(RegisterIntent);
+                finish(); //used to delete the last activity history which we want to delete
+            }
+        });
+
+    //on clicking on forgot password button
+        forgot_pass_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 Intent homeIntent = new Intent(MainActivity.this, Register.class);
                 startActivity(homeIntent);
                 finish(); //used to delete the last activity history which we want to delete

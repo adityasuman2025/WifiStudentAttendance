@@ -55,6 +55,17 @@
             />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/forgot_pass_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:textColor="@color/white"
+        android:text="Forgot Password"
+        android:layout_above="@+id/register_btn"
+        android:background="@color/colorAccent"
+        style="?android:attr/borderlessButtonStyle"
+        />
 
     <Button
         android:id="@+id/register_btn"
@@ -63,7 +74,6 @@
         android:layout_gravity="end"
         android:textColor="@color/colorAccent"
         android:text="Register"
-
         android:layout_alignParentBottom="true"
         style="?android:attr/borderlessButtonStyle"
         />

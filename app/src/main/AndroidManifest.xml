@@ -3,22 +3,19 @@
     package="com.example.qr_attendance">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:networkSecurityConfig="@xml/network_security_config"
-
         android:allowBackup="true"
         android:icon="@drawable/logo_icon"
         android:label="Student Attendance"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@drawable/logo_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+        <activity android:name=".ForgotPassword"></activity>
         <activity
             android:name=".ManageCourse"
             android:label="Manage Courses" />
@@ -45,7 +42,6 @@
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
-
     </application>
 
 </manifest>
