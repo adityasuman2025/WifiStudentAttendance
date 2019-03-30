@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.concurrent.ExecutionException;
 
@@ -142,6 +143,27 @@ public class ForgotPassword extends AppCompatActivity {
                     }
                 }
             });
+        }
+    }
+
+    //function to ask for permission
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        if(PERMISSION_CODE == 1)//READ_PHONE_STATE
+        {
+            //restarting app
+            finish();
+            startActivity(getIntent());
+
+            if(grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                Toast.makeText(this, "Permission Granted! Please Restart the App.", Toast.LENGTH_SHORT);
+            }
+            else
+            {
+                Toast.makeText(this, "Permission Not Granted", Toast.LENGTH_SHORT);
+            }
         }
     }
 }

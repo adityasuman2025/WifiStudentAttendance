@@ -141,6 +141,8 @@ public class MainActivity extends AppCompatActivity {
                             }
                             else
                             {
+                                //login_feed.setText(login_result);
+
                                 login_feed.setText("Your login credentials may be incorrect or this may be not your registered phone.");
                             }
 

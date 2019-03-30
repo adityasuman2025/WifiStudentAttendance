@@ -648,7 +648,7 @@ public class DatabaseActions extends AsyncTask<String,Void,String>
                 String stud_id = params[1];
                 String new_password = params[2];
 
-                //connecting with server
+                //connecting with servverify_loginer
                 url = new URL(login_url);
                 HttpURLConnection httpURLConnection = null;
                 httpURLConnection = (HttpURLConnection)url.openConnection();
