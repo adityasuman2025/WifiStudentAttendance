@@ -134,8 +134,6 @@ public class MainActivity extends AppCompatActivity {
                                 editor.putString("user_id", new Encryption().encrypt(login_result));
                                 editor.apply();
 
-                                //login_feed.setText(Integer.toString(login_result));
-
                                 //redirecting the list course page
                                 Intent ListCourseIntent = new Intent(MainActivity.this, Dashboard.class);
                                 startActivity(ListCourseIntent);

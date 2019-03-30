@@ -2,6 +2,8 @@ package com.example.qr_attendance;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -31,6 +33,8 @@ public class ForgotPassword extends AppCompatActivity {
     String uniqueID;
     int PERMISSION_CODE = 1;
 
+    SharedPreferences sharedPreferences;
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -42,6 +46,8 @@ public class ForgotPassword extends AppCompatActivity {
         serial_input = findViewById(R.id.serial_input);
         forgot_pass_feed = findViewById(R.id.forgot_pass_feed);
         done_btn = findViewById(R.id.done_btn);
+
+        sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
 
     // checking if permission to get serial number of phone is granted or not
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
@@ -75,33 +81,64 @@ public class ForgotPassword extends AppCompatActivity {
                     String roll_no = roll_input.getText().toString().toUpperCase();
                     String serial_no = serial_input.getText().toString();
 
-                    if(serial_no.equals(uniqueID)) //serial number of that phone is same as that of entered serial number
+                    if(roll_no.length() != 0 && serial_no.length() != 0)
                     {
-                    //checking if phone if connected to net or not
-                        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-                        if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
-                                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED)
+                        if(serial_no.equals(uniqueID)) //serial number of that phone is same as that of entered serial number
                         {
-                            try
+                            //checking if phone if connected to net or not
+                            ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+                            if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                                    connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED)
                             {
-                                type = "check_stud_roll_and_serial_exist_in_db";
-                                String check_stud_roll_and_serial_exist_in_dbResult = new DatabaseActions().execute(type, roll_no, serial_no).get();
+                                try
+                                {
+                                    type = "check_stud_roll_and_serial_exist_in_db";
+                                    String check_stud_roll_and_serial_exist_in_dbResult = new DatabaseActions().execute(type, roll_no, serial_no).get();
 
-                                forgot_pass_feed.setText(check_stud_roll_and_serial_exist_in_dbResult);
-                            } catch (ExecutionException e) {
-                                e.printStackTrace();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                    if(check_stud_roll_and_serial_exist_in_dbResult.equals("-1"))
+                                    {
+                                        forgot_pass_feed.setText("Database issue found");
+                                    }
+                                    else if(check_stud_roll_and_serial_exist_in_dbResult.equals("Something went wrong"))
+                                    {
+                                        forgot_pass_feed.setText(check_stud_roll_and_serial_exist_in_dbResult);
+                                    }
+                                    else if(Integer.parseInt(check_stud_roll_and_serial_exist_in_dbResult)> 0)
+                                    {
+                                    //creating cookie of the forgot_password_stud_id
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        editor.putString("forgot_password_stud_id", check_stud_roll_and_serial_exist_in_dbResult);
+                                        editor.apply();
+
+                                    //redirecting to the change password page
+                                        Intent ChangePasswordIntent = new Intent(ForgotPassword.this, ChangePassword.class);
+                                        startActivity(ChangePasswordIntent);
+                                        finish();
+                                    }
+                                    else
+                                    {
+                                        forgot_pass_feed.setText("Entered details do not match in database");
+                                    }
+
+                                } catch (ExecutionException e) {
+                                    e.printStackTrace();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            else
+                            {
+                                forgot_pass_feed.setText("Internet connection is not available");
                             }
                         }
-                        else
+                        else //serial number of this phone is not matching with the entered serial number
                         {
-                            forgot_pass_feed.setText("Internet connection is not available");
+                            forgot_pass_feed.setText("Entered serial number is not matching with this phone serial");
                         }
                     }
-                    else //serial number of this phone is not matching with the entered serial number
+                    else
                     {
-                        forgot_pass_feed.setText("Entered serial number is not matching with this phone serial");
+                        forgot_pass_feed.setText("Please fill all the fields");
                     }
                 }
             });
