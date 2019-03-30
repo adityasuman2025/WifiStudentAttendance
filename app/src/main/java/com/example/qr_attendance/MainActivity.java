@@ -176,9 +176,8 @@ public class MainActivity extends AppCompatActivity {
         forgot_pass_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent homeIntent = new Intent(MainActivity.this, Register.class);
-                startActivity(homeIntent);
-                finish(); //used to delete the last activity history which we want to delete
+                Intent ForgotPasswordIntent = new Intent(MainActivity.this, ForgotPassword.class);
+                startActivity(ForgotPasswordIntent);
             }
         });
     }

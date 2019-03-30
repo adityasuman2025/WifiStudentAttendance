@@ -15,7 +15,8 @@
         android:roundIcon="@drawable/logo_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ForgotPassword"></activity>
+        <activity android:name=".ForgotPassword"
+            android:label="Forgot Password" />
         <activity
             android:name=".ManageCourse"
             android:label="Manage Courses" />
