@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.qr_attendance">
+    package="com.example.studentattendance">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -10,31 +10,32 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/logo_icon"
-        android:label="Student Attendance"
+        android:label="Wifi Student Attendance"
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@drawable/logo_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ChangePassword"></activity>
+        
+        <activity android:name="com.example.studentattendance.ChangePassword"></activity>
         <activity
-            android:name=".ForgotPassword"
+            android:name="com.example.studentattendance.ForgotPassword"
             android:label="Forgot Password" />
         <activity
-            android:name=".ManageCourse"
+            android:name="com.example.studentattendance.ManageCourse"
             android:label="Manage Courses" />
         <activity
-            android:name=".Dashboard"
+            android:name="com.example.studentattendance.Dashboard"
             android:label="Student Dashboard" />
         <activity
-            android:name=".Register"
+            android:name="com.example.studentattendance.Register"
             android:label="Register" />
         <activity
-            android:name=".AttendanceQR"
+            android:name="com.example.studentattendance.AttendanceQR"
             android:label="QR Code" />
         <activity
-            android:name=".ViewAttendance"
+            android:name="com.example.studentattendance.ViewAttendance"
             android:label="View Attendance" />
-        <activity android:name=".MainActivity">
+        <activity android:name="com.example.studentattendance.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

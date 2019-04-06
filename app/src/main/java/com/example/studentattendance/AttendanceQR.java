@@ -1,4 +1,4 @@
-package com.example.qr_attendance;
+package com.example.studentattendance;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,7 +20,6 @@ import org.json.JSONArray;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Locale;
 
 public class AttendanceQR extends AppCompatActivity
 {

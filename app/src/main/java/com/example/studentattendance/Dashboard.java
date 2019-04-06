@@ -1,4 +1,4 @@
-package com.example.qr_attendance;
+package com.example.studentattendance;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;

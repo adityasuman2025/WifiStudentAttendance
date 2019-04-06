@@ -1,17 +1,14 @@
-package com.example.qr_attendance;
+package com.example.studentattendance;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,22 +21,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.concurrent.ExecutionException;
 
-public class ViewFragment extends Fragment
+public class CoursesFragment extends Fragment
 {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
@@ -56,8 +40,9 @@ public class ViewFragment extends Fragment
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_view, null);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
+    {
+        View view = inflater.inflate(R.layout.fragment_courses, null);
 
         text = view.findViewById(R.id.text);
         courseListView = view.findViewById(R.id.courseListView);
@@ -69,57 +54,62 @@ public class ViewFragment extends Fragment
 
         final String user_id = new Encryption().decrypt(user_id_cookie);
 
-        //checking if phone if connected to net or not
+    //checking if phone if connected to net or not
         ConnectivityManager connMgr = (ConnectivityManager) getActivity()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
         if (networkInfo != null && networkInfo.isConnected()) //phone is connected
         {
-            //getting the course list of the user from database
+        //getting the course list of the user from database
             String type = "get_user_courses";
             try
             {
                 String get_user_courses_result = (new DatabaseActions().execute(type, user_id).get());
 
-            //parse JSON data
-                JSONArray ja = new JSONArray(get_user_courses_result);
-                JSONObject jo = null;
-
-                data = new String[ja.length()];
-                course_ids = new String[ja.length()];
-
-                String temp_courses = "";
-                String temp_course_ids = "";
-                for (int i =0; i<ja.length(); i++)
+                if(!get_user_courses_result.equals("0") && !get_user_courses_result.equals("-1") && !get_user_courses_result.equals("Something went wrong"))
                 {
-                    jo = ja.getJSONObject(i);
+                //parse JSON data
+                    JSONArray ja = new JSONArray(get_user_courses_result);
+                    JSONObject jo = null;
 
-                    String course_code = jo.getString("course_code");
-                    String course_id = jo.getString("id");
+                    data = new String[ja.length()];
+                    course_ids = new String[ja.length()];
 
-                    //String temp = course_code + " # " + course_id;
-                    temp_courses += (course_code + ",");
-                    temp_course_ids += (course_id + ",");
+                    String temp_courses = "";
+                    String temp_course_ids = "";
+                    for (int i =0; i<ja.length(); i++)
+                    {
+                        jo = ja.getJSONObject(i);
 
-                    data[i] = course_code;
-                    course_ids[i] = course_id;
+                        String course_code = jo.getString("course_code");
+                        String course_id = jo.getString("id");
+
+                        //String temp = course_code + " # " + course_id;
+                        temp_courses += (course_code + ",");
+                        temp_course_ids += (course_id + ",");
+
+                        data[i] = course_code;
+                        course_ids[i] = course_id;
+                    }
+
+                    //listing courses in listview
+                    adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, data);
+                    courseListView.setAdapter(adapter);
+
+                    //creating cookie of the registered courses of that student
+                    editor.putString("studentCourses", temp_courses);
+                    editor.putString("studentCoursesIDs", temp_course_ids);
+                    editor.apply();
                 }
-
-                //listing courses in listview
-                adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, data);
-                courseListView.setAdapter(adapter);
-
-                //creating cookie of the registered courses of that student
-                editor.putString("studentCourses", temp_courses);
-                editor.putString("studentCoursesIDs", temp_course_ids);
-                editor.apply();
-
-            } catch (ExecutionException e) {
+            } catch (ExecutionException e)
+            {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (JSONException e)
+            {
+                text.setText("Something went wrong while listing the student courses form database");
                 e.printStackTrace();
             }
         }
@@ -130,12 +120,12 @@ public class ViewFragment extends Fragment
             old_saved_courses = studentCourses_cookie.split(",");
             old_saved_courseIDs = studentCoursesIDs_cookie.split(",");
 
-            //listing courses in listview
+        //listing courses in listview
             adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, old_saved_courses);
             courseListView.setAdapter(adapter);
         }
 
-        //on clicking on any list item
+    //on clicking on any list item
         courseListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
@@ -159,9 +149,9 @@ public class ViewFragment extends Fragment
                 editor.putString("course_code", course_code_cookie);
                 editor.apply();
 
-                //redirecting to the qr code generator page
-                Intent ViewAttendanceIntent = new Intent(getActivity().getApplicationContext(), ViewAttendance.class);
-                startActivity(ViewAttendanceIntent);
+            //redirecting to the qr code generator page
+                Intent QRCodeGeneratorIntent = new Intent(getActivity().getApplicationContext(), AttendanceQR.class);
+                startActivity(QRCodeGeneratorIntent);
             }
         });
 
