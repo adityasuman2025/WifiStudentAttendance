@@ -99,16 +99,17 @@ public class AttendanceQR extends AppCompatActivity
                         @Override
                         public void onClick(View view)
                         {
-                            //to get current timestamps
+                        //to get current timestamps
                             Long tsLong = System.currentTimeMillis()/1000;
                             String ts = tsLong.toString();
 
-                            //storing attendance info into JSON and encrypting it
+                        //storing attendance info into JSON and encrypting it
                             String qr_data[] = {user_id_cookie, course_id_cookie, ts}; //JSON format: userID, courseID, currentTimestamps
                             JSONArray mJSONArray = new JSONArray(Arrays.asList(qr_data));
 
                             String encrypted_data = new Encryption().encrypt(mJSONArray.toString());
 
+                        //sending data to professor(host) using wifi
                             if(user_id_cookie != null && course_id_cookie != null)
                             {
                                 MyClientTask myClientTask = new MyClientTask(hotspotIP, port, encrypted_data);
@@ -150,14 +151,17 @@ public class AttendanceQR extends AppCompatActivity
 
             try
             {
+            //preparing socket for communicating with host
                 socket = new Socket(dstAddress, dstPort);
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
 
+            //sending data to host
                 if(msgToServer != null){
                     dataOutputStream.writeUTF(msgToServer);
                 }
 
+            //receiving data from host
                 response = dataInputStream.readUTF();
 
             } catch (UnknownHostException e)
