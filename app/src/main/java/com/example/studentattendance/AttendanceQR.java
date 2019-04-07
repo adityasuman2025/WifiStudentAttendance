@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -45,6 +46,8 @@ public class AttendanceQR extends AppCompatActivity
 
     SharedPreferences sharedPreferences;
 
+    WifiManager wifimanager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -73,11 +76,13 @@ public class AttendanceQR extends AppCompatActivity
 
         if(!mWifi.isConnected()) //if wifi is not connected
         {
-            qr_text.setText("Your phone Wifi is OFF. Turn it ON connect to the professor's hotspot and restart the App");
+            text.setText("");
+            qr_text.setText("Your phone Wifi is OFF. Turn it ON connect to the professor's hotspot, then try to mark attendance again");
         }
         else//if wifi is connected
         {
             qr_text.setText("");
+            text.setText("");
             wifImg.setImageResource(R.drawable.wifi);
         }
 
@@ -93,11 +98,14 @@ public class AttendanceQR extends AppCompatActivity
 
                 if(!mWifi.isConnected()) //if wifi is not connected
                 {
-                    qr_text.setText("Your phone Wifi is OFF. Turn it ON connect to the professor's hotspot and restart the App");
+                    text.setText("");
+                    qr_text.setText("Your phone Wifi is OFF. Turn it ON connect to the professor's hotspot, then try to mark attendance again");
                 }
                 else//if wifi is connected
                 {
+                    text.setText("");
                     qr_text.setText("");
+                    wifImg.setImageResource(R.drawable.wifi);
 
                 //to get current timestamps
                     Long tsLong = System.currentTimeMillis()/1000;
@@ -220,6 +228,10 @@ public class AttendanceQR extends AppCompatActivity
                 qr_text.setText(response);
                 text.setText("");
             }
+
+        //disconnecting that student from Wifi
+            wifimanager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            wifimanager.setWifiEnabled(false);
 
             super.onPostExecute(result);
         }
