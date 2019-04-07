@@ -38,6 +38,7 @@ public class AttendanceQR extends AppCompatActivity
     ImageView wifImg;
     Button markBtn;
     TextView qr_text;
+    TextView text;
 
     String hotspotIP = "192.168.43.1";
     int port = 3399;
@@ -55,6 +56,7 @@ public class AttendanceQR extends AppCompatActivity
         wifImg = findViewById(R.id.wifImg);
         markBtn = findViewById(R.id.markBtn);
         qr_text = findViewById(R.id.qr_text);
+        text = findViewById(R.id.text);
 
     //to get the cookie values
         sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
@@ -71,10 +73,11 @@ public class AttendanceQR extends AppCompatActivity
 
         if(!mWifi.isConnected()) //if wifi is not connected
         {
-            qr_text.setText("Your mobile Wifi is OFF. Turn it ON and restart the App");
+            qr_text.setText("Your phone Wifi is OFF. Turn it ON connect to the professor's hotspot and restart the App");
         }
         else//if wifi is connected
         {
+            qr_text.setText("");
             wifImg.setImageResource(R.drawable.wifi);
         }
 
@@ -90,37 +93,32 @@ public class AttendanceQR extends AppCompatActivity
 
                 if(!mWifi.isConnected()) //if wifi is not connected
                 {
-                    qr_text.setText("Your mobile Wifi is OFF. Turn it ON and restart the App");
+                    qr_text.setText("Your phone Wifi is OFF. Turn it ON connect to the professor's hotspot and restart the App");
                 }
                 else//if wifi is connected
                 {
-                //on clicking on mark button
-                    markBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view)
-                        {
-                        //to get current timestamps
-                            Long tsLong = System.currentTimeMillis()/1000;
-                            String ts = tsLong.toString();
+                    qr_text.setText("");
 
-                        //storing attendance info into JSON and encrypting it
-                            String qr_data[] = {user_id_cookie, course_id_cookie, ts}; //JSON format: userID, courseID, currentTimestamps
-                            JSONArray mJSONArray = new JSONArray(Arrays.asList(qr_data));
+                //to get current timestamps
+                    Long tsLong = System.currentTimeMillis()/1000;
+                    String ts = tsLong.toString();
 
-                            String encrypted_data = new Encryption().encrypt(mJSONArray.toString());
+                //storing attendance info into JSON and encrypting it
+                    String qr_data[] = {user_id_cookie, course_id_cookie, ts}; //JSON format: userID, courseID, currentTimestamps
+                    JSONArray mJSONArray = new JSONArray(Arrays.asList(qr_data));
 
-                        //sending data to professor(host) using wifi
-                            if(user_id_cookie != null && course_id_cookie != null)
-                            {
-                                MyClientTask myClientTask = new MyClientTask(hotspotIP, port, encrypted_data);
-                                myClientTask.execute();
-                            }
-                            else
-                            {
-                                qr_text.setText("Something went wrong");
-                            }
-                        }
-                    });
+                    String encrypted_data = new Encryption().encrypt(mJSONArray.toString());
+
+                //sending data to professor(host) using wifi
+                    if(user_id_cookie != null && course_id_cookie != null)
+                    {
+                        MyClientTask myClientTask = new MyClientTask(hotspotIP, port, encrypted_data);
+                        myClientTask.execute();
+                    }
+                    else
+                    {
+                        qr_text.setText("Something went wrong");
+                    }
                 }
             }
        });
@@ -167,11 +165,11 @@ public class AttendanceQR extends AppCompatActivity
             } catch (UnknownHostException e)
             {
                 e.printStackTrace();
-                response = "Failed to connect to the Server. You are connected to wrong WI-Fi or Host may not active at the moment";
+                response = "Failed to connect to the Professor. You may be connected to wrong WI-Fi or Host is inactive at the moment";
             } catch (IOException e)
             {
                 e.printStackTrace();
-                response = "Failed to connect to the Server. You are connected to wrong WI-Fi or Host may not active at the moment";;
+                response = "Failed to connect to the Professor. You may be connected to wrong WI-Fi or Host is inactive at the moment";
             } finally
             {
                 if (socket != null)
@@ -209,10 +207,21 @@ public class AttendanceQR extends AppCompatActivity
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            qr_text.setText(response);
+        protected void onPostExecute(Void result)
+        {
+        //showing processed msg to student/client
+            if(response.equals("Your attendance successfully marked"))
+            {
+                text.setText(response);
+                qr_text.setText("");
+            }
+            else
+            {
+                qr_text.setText(response);
+                text.setText("");
+            }
+
             super.onPostExecute(result);
         }
     }
-
 }

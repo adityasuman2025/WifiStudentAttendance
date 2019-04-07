@@ -45,6 +45,14 @@
             android:textAlignment="center"
             android:textColor="@color/red"
             android:layout_marginTop="200px"/>
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="@android:color/holo_green_dark"
+            android:textSize="50px" />
     </LinearLayout>
 
 </ScrollView>
