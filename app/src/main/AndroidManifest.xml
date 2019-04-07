@@ -35,7 +35,7 @@
             android:label="Register" />
         <activity
             android:name="com.example.studentattendance.AttendanceQR"
-            android:label="QR Code" />
+            android:label="WiFi Mark Attendance" />
         <activity
             android:name="com.example.studentattendance.ViewAttendance"
             android:label="View Attendance" />
