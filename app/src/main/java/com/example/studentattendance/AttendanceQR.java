@@ -165,11 +165,11 @@ public class AttendanceQR extends AppCompatActivity
             } catch (UnknownHostException e)
             {
                 e.printStackTrace();
-                response = "Failed to connect to the Professor. You may be connected to wrong WI-Fi or Host is inactive at the moment";
+                response = "Failed to connect to the Professor. You may be connected to wrong WI-Fi or Professor is inactive at the moment";
             } catch (IOException e)
             {
                 e.printStackTrace();
-                response = "Failed to connect to the Professor. You may be connected to wrong WI-Fi or Host is inactive at the moment";
+                response = "Failed to connect to the Professor. You may be connected to wrong WI-Fi or Professor is inactive at the moment";
             } finally
             {
                 if (socket != null)
