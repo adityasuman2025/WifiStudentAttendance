@@ -29,8 +29,7 @@
             android:textColor="@color/colorPrimary"
             android:paddingTop="10px"
             android:paddingBottom="10px"
-            android:paddingLeft="45px"
-            android:text="hi"/>
+            android:paddingLeft="45px"/>
 
         <View
             android:id="@+id/divider"
