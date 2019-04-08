@@ -80,7 +80,7 @@ public class AttendanceQR extends AppCompatActivity
             qr_text.setText("Your phone Wifi is OFF. Turn it ON connect to the professor's hotspot, then try to mark attendance again");
         }
         else//if wifi is connected
-        { 
+        {
             qr_text.setText("");
             text.setText("");
             wifImg.setImageResource(R.drawable.wifi);
